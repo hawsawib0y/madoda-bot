@@ -2,40 +2,17 @@ import 'dotenv/config';
 import { Client, GatewayIntentBits } from 'discord.js';
 import express from 'express';
 
+// بوت Discord
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
 // الأشخاص
 const members = {
-    "احمد": {
-        "الاسم كامل": "احمد فتحي احمد باحميد",
-        "الجنسية": "اليمن",
-        "الديار": "مدودة",
-        "ايش يرجع": "طيورة",
-        "الصفات": "خال، رجال، جلاد يوسف"
-    },
-    "يوسف": {
-        "الاسم كامل": "يوسف القحطاني (ابو قحط)",
-        "الجنسية": "نص يمن نص سعودية",
-        "الديار": "ماعنده مترحل من مدودة",
-        "ايش يرجع": "قاضي او قحطاني",
-        "الصفات": "كابوس احمد، خال، نشبة، مطوع"
-    },
-    "ياسر": {
-        "الاسم كامل": "ياسر الباشا",
-        "الجنسية": "اليمن",
-        "الديار": "الرياض",
-        "ايش يرجع": "خير وبركة",
-        "الصفات": "قائد، طيب، ذكي، محبوب"
-    },
-    "عمار": {
-        "الاسم كامل": "عمار الحمدي",
-        "الجنسية": "اليمن",
-        "الديار": "صنعاء",
-        "ايش يرجع": "إبداع ونجاح",
-        "الصفات": "مجتهد، صبور، طموح، محبوب"
-    }
+    "احمد": { "الاسم كامل": "احمد فتحي احمد باحميد", "الجنسية": "اليمن", "الديار": "مدودة", "ايش يرجع": "طيورة", "الصفات": "خال، رجال، جلاد يوسف" },
+    "يوسف": { "الاسم كامل": "يوسف القحطاني (ابو قحط)", "الجنسية": "نص يمن نص سعودية", "الديار": "ماعنده مترحل من مدودة", "ايش يرجع": "قاضي او قحطاني", "الصفات": "كابوس احمد، خال، نشبة، مطوع" },
+    "ياسر": { "الاسم كامل": "ياسر الباشا", "الجنسية": "اليمن", "الديار": "الرياض", "ايش يرجع": "خير وبركة", "الصفات": "قائد، طيب، ذكي، محبوب" },
+    "عمار": { "الاسم كامل": "عمار الحمدي", "الجنسية": "اليمن", "الديار": "صنعاء", "ايش يرجع": "إبداع ونجاح", "الصفات": "مجتهد، صبور، طموح، محبوب" }
 };
 
 // نكت
@@ -52,11 +29,10 @@ let currentRoom = null;
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
     const content = message.content.trim();
+    if (!content.startsWith('-')) return;
 
-    if (!content.startsWith('-')) return; // كل الأوامر تبدأ بـ -
-
-    const command = content.slice(1).split(' ')[0]; // يقطع "-"
-    const args = content.split(' ').slice(1); // باقي النص
+    const command = content.slice(1).split(' ')[0];
+    const args = content.split(' ').slice(1);
 
     try {
         if (command === 'ping') {
@@ -93,14 +69,12 @@ client.on('messageCreate', async message => {
 // Express Web Server
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
-    res.send('بوت Discord شغال كـ Web Service!');
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.get('/', (req, res) => res.send('بوت Discord شغال كـ Web Service!'));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // تسجيل الدخول
+if (!process.env.TOKEN) {
+    console.error("❌ الرجاء إضافة TOKEN في Environment Variables على Render");
+    process.exit(1);
+}
 client.login(process.env.TOKEN);
