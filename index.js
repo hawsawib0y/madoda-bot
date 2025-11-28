@@ -1,15 +1,14 @@
-require('dotenv').config();
-const { Client, GatewayIntentBits, SlashCommandBuilder } = require('discord.js');
-const { Configuration, OpenAIApi } = require('openai');
+import 'dotenv/config';
+import { Client, GatewayIntentBits } from 'discord.js';
+import OpenAI from 'openai';
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
-const configuration = new Configuration({
+const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration);
 
 // تعريف الأشخاص
 const members = {
@@ -50,70 +49,60 @@ const jokes = [
     "واحد حضرمي حاول يطبخ، بس نسي الملح، قال: الطعم مثل السفر الطويل، بلا نهاية."
 ];
 
-// أوامر الألعاب
-const games = {
-    "لعبة1": "لعبة حجر ورقة مقص",
-    "لعبة2": "لعبة التخمين السريع"
-};
-
 // حالة دخول البوت لروم محدد
 let currentRoom = null;
 
 client.on('interactionCreate', async interaction => {
     try {
-        if (interaction.isChatInputCommand()) {
-            const { commandName } = interaction;
+        if (!interaction.isChatInputCommand()) return;
+        const { commandName } = interaction;
 
-            if (commandName === 'موجود') {
-                await interaction.reply('لا ماجا');
-            }
+        if (commandName === 'موجود') {
+            await interaction.reply('لا ماجا');
+        }
 
-            if (commandName === 'ping') {
-                await interaction.reply('MS');
-            }
+        if (commandName === 'ping') {
+            await interaction.reply('MS');
+        }
 
-            if (commandName === 'من_انت') {
-                let description = Object.keys(members).map(name => {
-                    const m = members[name];
-                    return `${name}:\nالاسم كامل: ${m["الاسم كامل"]}\nالجنسية: ${m["الجنسية"]}\nالديار: ${m["الديار"]}\nايش يرجع: ${m["ايش يرجع"]}\nالصفات: ${m["الصفات"]}`;
-                }).join("\n\n");
-                await interaction.reply(description);
-            }
+        if (commandName === 'من_انت') {
+            let description = Object.keys(members).map(name => {
+                const m = members[name];
+                return `${name}:\nالاسم كامل: ${m["الاسم كامل"]}\nالجنسية: ${m["الجنسية"]}\nالديار: ${m["الديار"]}\nايش يرجع: ${m["ايش يرجع"]}\nالصفات: ${m["الصفات"]}`;
+            }).join("\n\n");
+            await interaction.reply(description);
+        }
 
-            if (commandName === 'نكتة') {
-                const joke = jokes[Math.floor(Math.random() * jokes.length)];
-                await interaction.reply(joke);
-            }
+        if (commandName === 'نكتة') {
+            const joke = jokes[Math.floor(Math.random() * jokes.length)];
+            await interaction.reply(joke);
+        }
 
-            if (commandName === 'العاب') {
-                await interaction.reply(`الألعاب المتاحة:\n1️⃣ ${games["لعبة1"]}\n2️⃣ ${games["لعبة2"]}`);
-            }
+        if (commandName === 'gpt') {
+            await interaction.deferReply();
+            const question = interaction.options.getString('question');
+            const response = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [{ role: "user", content: question }]
+            });
+            await interaction.editReply(response.choices[0].message.content);
+        }
 
-            if (commandName === 'gpt') {
-                await interaction.deferReply();
-                const question = interaction.options.getString('question');
-                const response = await openai.createChatCompletion({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: question }]
-                });
-                await interaction.editReply(response.data.choices[0].message.content);
-            }
+        if (commandName === 'room') {
+            const roomId = interaction.options.getString('id');
+            currentRoom = roomId;
+            await interaction.reply(`دخلت الروم: ${roomId} ولن أخرج إلا إذا قلت اطلع`);
+        }
 
-            if (commandName === 'room') {
-                const roomId = interaction.options.getString('id');
-                currentRoom = roomId;
-                await interaction.reply(`دخلت الروم: ${roomId} ولن أخرج إلا إذا قلت اطلع`);
-            }
-
-            if (commandName === 'خرج') {
-                if (currentRoom) {
-                    await interaction.reply(`خرجت من الروم: ${currentRoom}`);
-                    currentRoom = null;
-                } else {
-                    await interaction.reply('أنا مش داخل أي روم حالياً.');
-                }
+        if (commandName === 'خرج') {
+            if (currentRoom) {
+                await interaction.reply(`خرجت من الروم: ${currentRoom}`);
+                currentRoom = null;
+            } else {
+                await interaction.reply('أنا مش داخل أي روم حالياً.');
             }
         }
+
     } catch (error) {
         console.error(error);
         if (!interaction.replied) {
