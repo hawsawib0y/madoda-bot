@@ -22,6 +22,10 @@ const client = new Client({
     ]
 });
 
+// ====== REMOVE PREVIOUS LISTENERS ======
+client.removeAllListeners('messageCreate');
+client.removeAllListeners('interactionCreate');
+
 // ====== MESSAGE HANDLER ======
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
