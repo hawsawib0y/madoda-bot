@@ -1,12 +1,40 @@
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const { 
+    Client, 
+    GatewayIntentBits, 
+    ActionRowBuilder, 
+    ButtonBuilder, 
+    ButtonStyle 
+} = require('discord.js');
 
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
+// ====== MESSAGE HANDLER ======
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
     const msg = message.content;
 
-    // !تعريف
+    // ====== أمر !help ======
+    if (msg === '!help') {
+        return message.channel.send(`
+🟢 **أوامر البوت المتاحة:**
+
+!تعريف — لعرض قائمة الأشخاص واختيار واحد منهم  
+يخال — ردود مخصصة  
+يخال اجلد يوسف — ردود خاصة 😂  
+السلام عليكم — رد تلقائي  
+
+🔧 أوامر جديدة قريبًا!
+        `);
+    }
+
+    // ====== أمر !تعريف ======
     if (msg === '!تعريف') {
         const row = new ActionRowBuilder()
             .addComponents(
@@ -15,14 +43,15 @@ client.on('messageCreate', async message => {
                 new ButtonBuilder().setCustomId('ammar').setLabel('عمار').setStyle(ButtonStyle.Primary),
                 new ButtonBuilder().setCustomId('yousef').setLabel('يوسف').setStyle(ButtonStyle.Primary)
             );
-        
-        await message.channel.send({ 
-            content: 'اختر اسم الشخص للتعريف 👇', 
-            components: [row] 
+
+        return message.channel.send({
+            content: 'اختر اسم الشخص للتعريف 👇',
+            components: [row]
         });
     }
 
-    // الردود الخاصة
+    // ====== ردود خاصة ======
+
     if (msg.includes('يخال اجلد يوسف')) {
         const replies = [
             'اهدا يا يوسف وربي اجيب لك مارتيرز',
@@ -30,7 +59,7 @@ client.on('messageCreate', async message => {
             'الحين بيجيك ولد طيورة يأدبك',
             'انت يباالك ترحيل من مدودة'
         ];
-        message.channel.send(replies[Math.floor(Math.random() * replies.length)]);
+        return message.channel.send(replies[Math.floor(Math.random() * replies.length)]);
     }
 
     if (msg === 'يخال') {
@@ -38,23 +67,24 @@ client.on('messageCreate', async message => {
             'الخوال هم العم ياسر وابو فهد',
             'الخال ياسر واحمد'
         ];
-        message.channel.send(replies[Math.floor(Math.random() * replies.length)]);
+        return message.channel.send(replies[Math.floor(Math.random() * replies.length)]);
     }
 
     if (msg === 'السلام عليكم') {
-        message.channel.send('السلام 🌴');
+        return message.channel.send('السلام 🌴');
     }
 });
 
+// ====== BUTTON INTERACTIONS ======
 client.on('interactionCreate', async interaction => {
     if (!interaction.isButton()) return;
 
     if (interaction.customId === 'yasser') {
-        await interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام 🌴');
+        return interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام 🌴');
     }
 
     if (interaction.customId === 'ahmed') {
-        await interaction.reply(`
+        return interaction.reply(`
 أحمد:
 الاسم كامل: احمد فتحي احمد باحميد
 الجنسية: اليمن
@@ -65,11 +95,11 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (interaction.customId === 'ammar') {
-        await interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر 🌴😎');
+        return interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر 🌴😎');
     }
 
     if (interaction.customId === 'yousef') {
-        await interaction.reply(`
+        return interaction.reply(`
 يوسف:
 يوسف القحطاني (ابو قحط)
 الجنسية: نص يمن نص سعودية
