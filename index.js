@@ -28,7 +28,6 @@ client.on('messageCreate', async message => {
 
     const msg = message.content;
 
-    // ====== !help ======
     if (msg === '!help') {
         return message.channel.send(`
 أوامر البوت المتاحة:
@@ -40,7 +39,6 @@ client.on('messageCreate', async message => {
         `);
     }
 
-    // ====== !تعريف ======
     if (msg === '!تعريف') {
         const row = new ActionRowBuilder()
             .addComponents(
@@ -56,7 +54,6 @@ client.on('messageCreate', async message => {
         });
     }
 
-    // ====== ردود خاصة ======
     if (msg.includes('يخال اجلد يوسف')) {
         const replies = [
             'اهدا يا يوسف وربي اجيب لك مارتيرز',
