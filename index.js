@@ -1,13 +1,9 @@
 import 'dotenv/config';
 import { Client, GatewayIntentBits } from 'discord.js';
-import OpenAI from 'openai';
+import express from 'express';
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-});
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
 });
 
 // تعريف الأشخاص
@@ -78,16 +74,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply(joke);
         }
 
-        if (commandName === 'gpt') {
-            await interaction.deferReply();
-            const question = interaction.options.getString('question');
-            const response = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
-                messages: [{ role: "user", content: question }]
-            });
-            await interaction.editReply(response.choices[0].message.content);
-        }
-
+        // أمر الغرف
         if (commandName === 'room') {
             const roomId = interaction.options.getString('id');
             currentRoom = roomId;
@@ -103,6 +90,8 @@ client.on('interactionCreate', async interaction => {
             }
         }
 
+        // يمكن إضافة أي أوامر ثانية هنا بنفس الطريقة
+
     } catch (error) {
         console.error(error);
         if (!interaction.replied) {
@@ -113,4 +102,17 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
+// Express Web Server لتشغيل البوت كـ Web Service
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.send('بوت Discord شغال كـ Web Service!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+// تسجيل الدخول للبوت
 client.login(process.env.TOKEN);
