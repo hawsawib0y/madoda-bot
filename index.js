@@ -2,7 +2,6 @@
 const express = require('express');
 const app = express();
 
-// صفحة بسيطة لفتح Port 3000
 app.get('/', (req, res) => res.send('Bot is running!'));
 app.listen(3000, () => console.log('Web service running on port 3000'));
 
@@ -32,14 +31,12 @@ client.on('messageCreate', async message => {
     // ====== !help ======
     if (msg === '!help') {
         return message.channel.send(`
-🟢 **أوامر البوت المتاحة:**
+أوامر البوت المتاحة:
 
-!تعريف — لعرض قائمة الأشخاص واختيار واحد منهم  
-يخال — ردود مخصصة  
-يخال اجلد يوسف — ردود خاصة 😂  
-السلام عليكم — رد تلقائي  
-
-🔧 أوامر جديدة قريبًا!
+!تعريف — لعرض قائمة الأشخاص واختيار واحد منهم
+يخال — ردود مخصصة
+يخال اجلد يوسف — ردود خاصة
+السلام عليكم — رد تلقائي
         `);
     }
 
@@ -54,7 +51,7 @@ client.on('messageCreate', async message => {
             );
 
         return message.channel.send({
-            content: 'اختر اسم الشخص للتعريف 👇',
+            content: 'اختر اسم الشخص للتعريف:',
             components: [row]
         });
     }
@@ -79,7 +76,7 @@ client.on('messageCreate', async message => {
     }
 
     if (msg === 'السلام عليكم') {
-        return message.channel.send('السلام 🌴');
+        return message.channel.send('وعليكم السلام ورحمة الله وبركاته');
     }
 });
 
@@ -88,7 +85,7 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isButton()) return;
 
     if (interaction.customId === 'yasser') {
-        return interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام 🌴');
+        return interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام');
     }
 
     if (interaction.customId === 'ahmed') {
@@ -103,7 +100,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (interaction.customId === 'ammar') {
-        return interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر 🌴😎');
+        return interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر');
     }
 
     if (interaction.customId === 'yousef') {
