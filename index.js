@@ -18,10 +18,6 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
 });
 
-// ====== REMOVE PREVIOUS LISTENERS ======
-client.removeAllListeners('messageCreate');
-client.removeAllListeners('interactionCreate');
-
 // ====== MESSAGE HANDLER ======
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
@@ -30,16 +26,16 @@ client.on('messageCreate', async message => {
     // ====== FUN COMMANDS ======
     if (msg === 'وربي فكك') {
         const jokes = [
-            'مرة حضرمي قال لصاحبه: ليش الحلوة غالية؟ قال: لأنها غالية',
-            'حضارم ما يحبون الجوع، مرة حضرمي قال: الجوع ذبحني',
-            'مرة حضرمي دخل السوق وقال: كم الريال؟ قالوا: 1، قال: اعطني كيلو'
+            'مرة حضرمي دخل السوق وقال للبائع: اعطني كيلو تمر، قال له البائع: ليش؟ قال: عشان الحلاوة ما تنقص من قلبي',
+            'حضارم قال لصاحبه: اذا الجوع ذبحني، قلت له: اصبر يا غالي، الكركديه جاهز',
+            'مرة حضرمي طلع البحر وقال: لو رحت نص الموجة ألقى كنز، رجع البيت لقى بس صدف'
         ];
         return message.channel.send(jokes[Math.floor(Math.random() * jokes.length)]);
     }
 
     if (msg === 'امصباح') return message.channel.send('صباح الخير');
     if (msg === 'امليل') return message.channel.send('مساء الخير');
-    if (msg === 'موجود ولا بيغ بوس جا؟') return message.channel.send(`انا موجود وبنقي 🏓 (البينغ: ${client.ws.ping}ms)`);
+    if (msg === 'موجود ولا بيغ بوس جا؟') return message.channel.send(`لا ماجا والبنق تبعي: ${client.ws.ping}ms`);
 
     // ====== ADMIN COMMANDS ======
     if (msg.startsWith('كي قفل فمك')) {
@@ -78,30 +74,35 @@ client.on('messageCreate', async message => {
 
     // ====== HELP ======
     if (msg === '!help' || msg === 'امجوازنة الحقني') {
-        return message.channel.send(`هذي الأوامر يا غالي:
+        return message.channel.send(`هذي الأوامر المتاحة:
 وربي فكك → يرسل نكتة حضرمية
 امصباح → صباح الخير
 امليل → مساء الخير
-موجود ولا بيغ بوس جا؟ → انا موجود وبنقي 🏓
+موجود ولا بيغ بوس جا؟ → لا ماجا + البنق
 كي قفل فمك @عضو → ميوت للعضو
 ترحيل الكلب @عضو → باند للعضو
 روح لفلف بمدودة وتعال @عضو → طرد مؤقت للعضو
 نظف المكان عدد → يمسح عدد الرسائل
 امجوازنة الحقني → يعرض كل الأوامر
-!تعريف → يطلع أزرار للتعريف بأشخاص
-من انت → معلومات عن البوت وأزرار خيارات`);
+!تعريف → يظهر منيو التعريف بالأشخاص
+من انت → معلومات عن البوت + خيارات`);
     }
 
     // ====== التعريف ======
     if (msg === '!تعريف') {
         const row = new ActionRowBuilder()
             .addComponents(
-                new ButtonBuilder().setCustomId('yasser').setLabel('ياسر').setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId('ahmed').setLabel('أحمد').setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId('ammar').setLabel('عمار').setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId('yousef').setLabel('يوسف').setStyle(ButtonStyle.Primary)
+                new StringSelectMenuBuilder()
+                    .setCustomId('person_select')
+                    .setPlaceholder('اختر الشخص')
+                    .addOptions([
+                        { label: 'ياسر', value: 'yasser' },
+                        { label: 'أحمد', value: 'ahmed' },
+                        { label: 'عمار', value: 'ammar' },
+                        { label: 'يوسف', value: 'yousef' }
+                    ])
             );
-        return message.channel.send({ content: 'اختر اسم الشخص للتعريف 👇', components: [row] });
+        return message.channel.send({ content: 'اختر الشخص للتعريف 👇', components: [row] });
     }
 
     // ====== الردود الخاصة ======
@@ -146,11 +147,10 @@ client.on('messageCreate', async message => {
             .addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('more_options')
-                    .setPlaceholder('اضغط للاختيارات')
+                    .setPlaceholder('اختر خيار')
                     .addOptions([
-                        { label: 'أوامر البوت', description: 'عرض جميع الأوامر', value: 'commands' },
-                        { label: 'ألعاب', description: 'جرب لعب صغيرة', value: 'games' },
-                        { label: 'Fun Commands', description: 'وربي فكك، امصباح، امليل', value: 'fun' },
+                        { label: 'أوامر البوت', description: 'عرض كل الأوامر الإدارية', value: 'commands' },
+                        { label: 'ألعاب', description: 'جرب ألعاب صغيرة', value: 'games' },
                         { label: 'نكت حضرمية', description: 'نكت جديدة كل مرة', value: 'jokes' }
                     ])
             );
@@ -161,43 +161,43 @@ client.on('messageCreate', async message => {
 
 // ====== BUTTON & SELECT MENU INTERACTIONS ======
 client.on('interactionCreate', async interaction => {
-    if (interaction.isButton()) {
-        if (interaction.customId === 'yasser') return interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام');
-        if (interaction.customId === 'ahmed') return interaction.reply(`أحمد: الاسم كامل: احمد فتحي احمد باحميد
+    if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === 'person_select') {
+            if (interaction.values[0] === 'yasser') return interaction.reply('ياسر: عمي وعم الكل هنا، رجل قوي، موضع احترام');
+            if (interaction.values[0] === 'ahmed') return interaction.reply(`أحمد: الاسم كامل: احمد فتحي احمد باحميد
 الجنسية: اليمن
 الديار: مدودة
 ايش يرجع: طيورة
 الصفات: خال، رجال، جلاد يوسف`);
-        if (interaction.customId === 'ammar') return interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر');
-        if (interaction.customId === 'yousef') return interaction.reply(`يوسف: يوسف القحطاني (ابو قحط)
+            if (interaction.values[0] === 'ammar') return interaction.reply('عمار: نائب البيغ بوس، شخص قوي ومؤثر');
+            if (interaction.values[0] === 'yousef') return interaction.reply(`يوسف: يوسف القحطاني (ابو قحط)
 الجنسية: نص يمن نص سعودية
 الديار: ماعنده مترحل من مدودة
 ايش يرجع: قاضي او قحطاني
 الصفات: كابوس احمد، خال، نشبة، مطوع`);
-    }
+        }
 
-    if (interaction.isStringSelectMenu()) {
         if (interaction.customId === 'more_options') {
             if (interaction.values[0] === 'commands') {
-                return interaction.reply({ content: 'هذي قائمة كل الأوامر', ephemeral: true });
+                return interaction.reply({ content: `أوامر البوت:
+كي قفل فمك @عضو → ميوت للعضو
+ترحيل الكلب @عضو → باند للعضو
+روح لفلف بمدودة وتعال @عضو → طرد مؤقت
+نظف المكان عدد → يمسح عدد الرسائل
+من انت → معلومات عن البوت
+اكتشف بنفسك`, ephemeral: true });
             }
+
             if (interaction.values[0] === 'games') {
-                return interaction.reply({ content: 'جرب لعبة رمي نرد أو Coinflip', ephemeral: true });
+                return interaction.reply({ content: `الألعاب المتاحة:
+1. رمي نرد → اكتب !roll
+2. رمي العملة → اكتب !coinflip`, ephemeral: true });
             }
-            if (interaction.values[0] === 'fun') {
-                return interaction.reply({ content: 'وربي فكك، امصباح، امليل، موجود ولا بيغ بوس جا؟', ephemeral: true });
-            }
+
             if (interaction.values[0] === 'jokes') {
                 const jokes = [
-                    'مرة حضرمي قال لصاحبه: ليش الحلوة غالية؟',
-                    'الجوع ذبحني',
-                    'مرة حضرمي دخل السوق وقال: اعطني كيلو'
+                    'مرة حضرمي دخل السوق وقال للبائع: اعطني كيلو تمر، قال له البائع: ليش؟ قال: عشان الحلاوة ما تنقص من قلبي',
+                    'حضارم قال لصاحبه: اذا الجوع ذبحني، قلت له: اصبر يا غالي، الكركديه جاهز',
+                    'مرة حضرمي طلع البحر وقال: لو رحت نص الموجة ألقى كنز، رجع البيت لقى بس صدف'
                 ];
-                return interaction.reply({ content: jokes[Math.floor(Math.random() * jokes.length)], ephemeral: true });
-            }
-        }
-    }
-});
-
-// ====== LOGIN ======
-client.login(process.env.DISCORD_TOKEN);
+                return interaction.reply({ con
