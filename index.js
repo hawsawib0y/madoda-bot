@@ -1,3 +1,12 @@
+// ====== KEEP ALIVE FOR RENDER ======
+const express = require('express');
+const app = express();
+
+// صفحة بسيطة لفتح Port 3000
+app.get('/', (req, res) => res.send('Bot is running!'));
+app.listen(3000, () => console.log('Web service running on port 3000'));
+
+// ====== DISCORD BOT ======
 const { 
     Client, 
     GatewayIntentBits, 
@@ -20,7 +29,7 @@ client.on('messageCreate', async message => {
 
     const msg = message.content;
 
-    // ====== أمر !help ======
+    // ====== !help ======
     if (msg === '!help') {
         return message.channel.send(`
 🟢 **أوامر البوت المتاحة:**
@@ -34,7 +43,7 @@ client.on('messageCreate', async message => {
         `);
     }
 
-    // ====== أمر !تعريف ======
+    // ====== !تعريف ======
     if (msg === '!تعريف') {
         const row = new ActionRowBuilder()
             .addComponents(
@@ -51,7 +60,6 @@ client.on('messageCreate', async message => {
     }
 
     // ====== ردود خاصة ======
-
     if (msg.includes('يخال اجلد يوسف')) {
         const replies = [
             'اهدا يا يوسف وربي اجيب لك مارتيرز',
@@ -110,4 +118,5 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
+// ====== LOGIN ======
 client.login(process.env.DISCORD_TOKEN);
