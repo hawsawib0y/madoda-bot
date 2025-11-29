@@ -1,12 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
-import { 
-  Client, 
-  GatewayIntentBits, 
-  ActionRowBuilder, 
-  StringSelectMenuBuilder, 
-  EmbedBuilder 
-} from 'discord.js';
+import pkg from 'discord.js';
+const { Client, GatewayIntentBits, EmbedBuilder } = pkg;
 
 // ====== KEEP ALIVE FOR RENDER ======
 const app = express();
@@ -23,7 +18,7 @@ const client = new Client({
   ]
 });
 
-// دالة لاختيار عشوائي
+// ====== RANDOM HELPER ======
 function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -52,7 +47,6 @@ client.on('messageCreate', async (message) => {
       ];
       return message.channel.send(randomChoice(jokes));
     }
-
     if (msg === 'امصباح') return message.channel.send('صباح الخير 🌞');
     if (msg === 'امليل') return message.channel.send('مساء الخير 🌙');
 
@@ -65,8 +59,7 @@ client.on('messageCreate', async (message) => {
     if (msg === '-يخال خش الروم') {
       if (!message.member.voice.channel) return message.channel.send('ادخل الروم أول 😅');
       const channel = message.member.voice.channel;
-      const botMember = message.guild.members.me;
-      await botMember.voice.setChannel(channel);
+      await message.guild.members.me.voice.setChannel(channel);
       return message.channel.send('دخلت الروم 😎');
     }
 
@@ -155,7 +148,6 @@ client.on('messageCreate', async (message) => {
           { name: 'استخدام الأوامر', value: 'استخدم -امصباح، -امليل، -وربي فكك، -من انت وغيرها', inline: false }
         )
         .setTimestamp();
-
       return message.channel.send({ embeds: [embed] });
     }
 
@@ -166,7 +158,7 @@ client.on('messageCreate', async (message) => {
         .setTitle('معلومات عن البوت 👇')
         .setDescription('هذي معلومات عن البوت:')
         .addFields(
-          { name: 'اسم البوت', value: client.user.username || 'Unknown', inline: true },
+          { name: 'اسم البوت', value: client.user.username, inline: true },
           { name: 'الحالة', value: client.presence?.status || 'online', inline: true },
           { name: 'المؤسس', value: 'العم ياسر', inline: true },
           { name: 'Ping', value: `${client.ws.ping}ms`, inline: true },
@@ -174,7 +166,6 @@ client.on('messageCreate', async (message) => {
           { name: 'معلومات إضافية', value: 'نسخة حضرمية من البوت 😎', inline: false }
         )
         .setTimestamp();
-
       return message.channel.send({ embeds: [embed] });
     }
 
