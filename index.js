@@ -155,10 +155,10 @@ client.on('messageCreate', async (message) => {
         .setCustomId('select_person')
         .setPlaceholder('اختر شخص')
         .addOptions([
-          { label: 'عمار', value: 'ammar', description: 'عمار' },
-          { label: 'ياسر', value: 'yasser', description: 'ياسر' },
+          { label: 'عمار', value: 'ammar', description: 'عيال مدودة' },
+          { label: 'ياسر', value: 'yasser', description: 'عيال مدودة' },
           { label: 'أحمد', value: 'ahmed', description: 'احمد فتحي احمد باحميد' },
-          { label: 'يوسف', value: 'yousef', description: 'يوسف' }
+          { label: 'يوسف', value: 'yousef', description: 'يوسف القحطاني (ابو قحط)' }
         ]);
 
       const row = new ActionRowBuilder().addComponents(selectMenu);
@@ -171,10 +171,23 @@ client.on('messageCreate', async (message) => {
       const value = interaction.values[0];
 
       let desc = '';
-      if (value === 'ammar') desc = 'عمار';
-      if (value === 'yasser') desc = 'ياسر';
-      if (value === 'ahmed') desc = 'احمد فتحي احمد باحميد';
-      if (value === 'yousef') desc = 'يوسف';
+      if (value === 'ammar' || value === 'yasser') {
+        desc = 'عيال مدودة';
+      }
+      if (value === 'ahmed') {
+        desc = `الاسم كامل: احمد فتحي احمد باحميد
+الجنسية: اليمن
+الديار: مدودة
+ايش يرجع: طيورة
+الصفات: خال، رجال، جلاد يوسف`;
+      }
+      if (value === 'yousef') {
+        desc = `الاسم كامل: يوسف القحطاني (ابو قحط)
+الجنسية: نص يمن نص سعودية
+الديار: ماعنده مترحل من مدودة
+ايش يرجع: قاضي او قحطاني
+الصفات: كابوس احمد، خال، نشبة، مطوع`;
+      }
 
       const embed = new EmbedBuilder()
         .setColor(0xff9900)
