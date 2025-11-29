@@ -1,7 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
-import pkg from 'discord.js';
-const { Client, GatewayIntentBits, EmbedBuilder } = pkg;
+import { 
+  Client, 
+  GatewayIntentBits, 
+  ActionRowBuilder, 
+  StringSelectMenuBuilder, 
+  EmbedBuilder 
+} from 'discord.js';
 
 // ====== KEEP ALIVE FOR RENDER ======
 const app = express();
@@ -18,7 +23,7 @@ const client = new Client({
   ]
 });
 
-// ====== RANDOM HELPER ======
+// دالة لاختيار عشوائي
 function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -47,6 +52,7 @@ client.on('messageCreate', async (message) => {
       ];
       return message.channel.send(randomChoice(jokes));
     }
+
     if (msg === 'امصباح') return message.channel.send('صباح الخير 🌞');
     if (msg === 'امليل') return message.channel.send('مساء الخير 🌙');
 
@@ -59,7 +65,8 @@ client.on('messageCreate', async (message) => {
     if (msg === '-يخال خش الروم') {
       if (!message.member.voice.channel) return message.channel.send('ادخل الروم أول 😅');
       const channel = message.member.voice.channel;
-      await message.guild.members.me.voice.setChannel(channel);
+      const botMember = message.guild.members.me;
+      await botMember.voice.setChannel(channel);
       return message.channel.send('دخلت الروم 😎');
     }
 
@@ -133,23 +140,50 @@ client.on('messageCreate', async (message) => {
 نظف المكان عدد → يمسح عدد الرسائل
 -تعريف → يطلع رسالة تعريف
 -من انت → معلومات عن البوت`);
+
     }
 
     // ====== DEFINITION COMMAND ======
     if (msg === '-تعريف') {
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
-        .setTitle('تعريف عن البوت 👇')
-        .setDescription('هذي رسالة تعريف عن البوت و الأشخاص المرتبطين به')
-        .addFields(
-          { name: 'الهدف', value: 'البوت يقوم بالرد على الأوامر واللعب مع المستخدمين', inline: false },
-          { name: 'مطور البوت', value: 'Golden Boy (العم ياسر)', inline: true },
-          { name: 'الأشخاص المعروفين', value: 'عمار، ياسر، أحمد، يوسف', inline: true },
-          { name: 'استخدام الأوامر', value: 'استخدم -امصباح، -امليل، -وربي فكك، -من انت وغيرها', inline: false }
-        )
+        .setTitle('تعريف شباب مدودة 👇')
+        .setDescription('اضغط على الاسم عشان تعرف عن الشخص')
         .setTimestamp();
-      return message.channel.send({ embeds: [embed] });
+
+      const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('select_person')
+        .setPlaceholder('اختر شخص')
+        .addOptions([
+          { label: 'عمار', value: 'ammar', description: 'عمار' },
+          { label: 'ياسر', value: 'yasser', description: 'ياسر' },
+          { label: 'أحمد', value: 'ahmed', description: 'احمد فتحي احمد باحميد' },
+          { label: 'يوسف', value: 'yousef', description: 'يوسف' }
+        ]);
+
+      const row = new ActionRowBuilder().addComponents(selectMenu);
+      return message.channel.send({ embeds: [embed], components: [row] });
     }
+
+    // ====== SELECT MENU HANDLER ======
+    client.on('interactionCreate', async (interaction) => {
+      if (!interaction.isStringSelectMenu()) return;
+      const value = interaction.values[0];
+
+      let desc = '';
+      if (value === 'ammar') desc = 'عمار';
+      if (value === 'yasser') desc = 'ياسر';
+      if (value === 'ahmed') desc = 'احمد فتحي احمد باحميد';
+      if (value === 'yousef') desc = 'يوسف';
+
+      const embed = new EmbedBuilder()
+        .setColor(0xff9900)
+        .setTitle(`تعريف ${value}`)
+        .setDescription(desc)
+        .setTimestamp();
+
+      await interaction.update({ embeds: [embed] });
+    });
 
     // ====== BOT INFO COMMAND ======
     if (msg === '-من انت') {
@@ -158,7 +192,7 @@ client.on('messageCreate', async (message) => {
         .setTitle('معلومات عن البوت 👇')
         .setDescription('هذي معلومات عن البوت:')
         .addFields(
-          { name: 'اسم البوت', value: client.user.username, inline: true },
+          { name: 'اسم البوت', value: client.user.username || 'Unknown', inline: true },
           { name: 'الحالة', value: client.presence?.status || 'online', inline: true },
           { name: 'المؤسس', value: 'العم ياسر', inline: true },
           { name: 'Ping', value: `${client.ws.ping}ms`, inline: true },
@@ -166,6 +200,7 @@ client.on('messageCreate', async (message) => {
           { name: 'معلومات إضافية', value: 'نسخة حضرمية من البوت 😎', inline: false }
         )
         .setTimestamp();
+
       return message.channel.send({ embeds: [embed] });
     }
 
