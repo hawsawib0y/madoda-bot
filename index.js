@@ -4,7 +4,11 @@ import express from 'express';
 
 // بوت Discord
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
 });
 
 // الأشخاص
@@ -28,31 +32,46 @@ let currentRoom = null;
 // التعامل مع الرسائل
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
+
     const content = message.content.trim();
     if (!content.startsWith('-')) return;
 
-    const command = content.slice(1).split(' ')[0];
-    const args = content.split(' ').slice(1);
+    // إصلاح قراءة الأمر
+    const parts = content.slice(1).trim().split(/ +/);
+    const command = parts[0];
+    const args = parts.slice(1);
 
     try {
         if (command === 'ping') {
             await message.reply('MS');
-        } else if (command === 'موجود') {
+        }
+
+        else if (command === 'موجود') {
             await message.reply('لا ماجا');
-        } else if (command === 'نكتة') {
+        }
+
+        else if (command === 'نكتة') {
             const joke = jokes[Math.floor(Math.random() * jokes.length)];
             await message.reply(joke);
-        } else if (command === 'من_انت') {
+        }
+
+        else if (command === 'من_انت') {
             const description = Object.keys(members).map(name => {
                 const m = members[name];
                 return `${name}:\nالاسم كامل: ${m["الاسم كامل"]}\nالجنسية: ${m["الجنسية"]}\nالديار: ${m["الديار"]}\nايش يرجع: ${m["ايش يرجع"]}\nالصفات: ${m["الصفات"]}`;
             }).join("\n\n");
+
             await message.reply(description);
-        } else if (command === 'room') {
+        }
+
+        else if (command === 'room') {
             const roomId = args[0];
+            if (!roomId) return message.reply("اكتب رقم الروم مثل: -room 123456");
             currentRoom = roomId;
             await message.reply(`دخلت الروم: ${roomId} ولن أخرج إلا إذا قلت -خرج`);
-        } else if (command === 'خرج') {
+        }
+
+        else if (command === 'خرج') {
             if (currentRoom) {
                 await message.reply(`خرجت من الروم: ${currentRoom}`);
                 currentRoom = null;
@@ -60,6 +79,7 @@ client.on('messageCreate', async message => {
                 await message.reply('أنا مش داخل أي روم حالياً.');
             }
         }
+
     } catch (error) {
         console.error(error);
         await message.reply('حصل خطأ ⚠️');
