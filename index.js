@@ -95,7 +95,7 @@ client.on('messageCreate', async (message) => {
       const user = message.mentions.members.first();
       if (!user) return message.channel.send('اختر عضو عشان تطرده');
       try {
-        await user.bban();
+        await user.ban();
         return message.channel.send(`عضو ${user.user.username} انبند`);
       } catch {
         return message.channel.send('ما قدرت انبنده — تأكد صلاحيات البوت ورتبته');
@@ -139,6 +139,7 @@ client.on('messageCreate', async (message) => {
 روح لفلف بمدودة وتعال @عضو → طرد مؤقت للعضو
 نظف المكان عدد → يمسح عدد الرسائل
 -تعريف → يطلع رسالة تعريف
+-تعريف ربحات → تعريف رائد و فيصل
 -من انت → معلومات عن البوت`);
     }
 
@@ -158,6 +159,26 @@ client.on('messageCreate', async (message) => {
           { label: 'ياسر', value: 'yasser', description: 'عيال مدودة' },
           { label: 'أحمد', value: 'ahmed', description: 'احمد فتحي احمد باحميد' },
           { label: 'يوسف', value: 'yousef', description: 'يوسف القحطاني (ابو قحط)' }
+        ]);
+
+      const row = new ActionRowBuilder().addComponents(selectMenu);
+      return message.channel.send({ embeds: [embed], components: [row] });
+    }
+
+    // ====== RABHAT DEFINITION COMMAND ======
+    if (msg === '-تعريف ربحات') {
+      const embed = new EmbedBuilder()
+        .setColor(0x00ccff)
+        .setTitle('تعريف ربحات')
+        .setDescription('اضغط على الاسم عشان تعرف عن الشخص')
+        .setTimestamp();
+
+      const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('select_rabhat')
+        .setPlaceholder('اختر شخص')
+        .addOptions([
+          { label: 'أسطورة', value: 'as6ora', description: 'الأسطورة رائد' },
+          { label: 'فيصل', value: 'faisal', description: 'فيصل رائد باحميد' }
         ]);
 
       const row = new ActionRowBuilder().addComponents(selectMenu);
@@ -227,31 +248,59 @@ client.on('interactionCreate', async (interaction) => {
   const value = interaction.values[0];
 
   let desc = '';
-  if (value === 'ammar' || value === 'yasser') {
-    desc = 'عيال مدودة';
-  }
-  if (value === 'ahmed') {
-    desc = `الاسم كامل: احمد فتحي احمد باحميد
+
+  if (interaction.customId === 'select_person') {
+    if (value === 'ammar' || value === 'yasser') {
+      desc = 'عيال مدودة';
+    }
+    if (value === 'ahmed') {
+      desc = `الاسم كامل: احمد فتحي احمد باحميد
 الجنسية: اليمن
 الديار: مدودة
 ايش يرجع: طيورة
 الصفات: خال، رجال، جلاد يوسف`;
-  }
-  if (value === 'yousef') {
-    desc = `الاسم كامل: يوسف القحطاني (ابو قحط)
+    }
+    if (value === 'yousef') {
+      desc = `الاسم كامل: يوسف القحطاني (ابو قحط)
 الجنسية: نص يمن نص سعودية
 الديار: ماعنده مترحل من مدودة
 ايش يرجع: قاضي او قحطاني
 الصفات: كابوس احمد، خال، نشبة، مطوع`;
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0xff9900)
+      .setTitle(`تعريف ${value}`)
+      .setDescription(desc)
+      .setTimestamp();
+
+    return interaction.update({ embeds: [embed] });
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff9900)
-    .setTitle(`تعريف ${value}`)
-    .setDescription(desc)
-    .setTimestamp();
+  if (interaction.customId === 'select_rabhat') {
 
-  await interaction.update({ embeds: [embed] });
+    if (value === 'as6ora') {
+      desc = `الاسم الكامل : رائد محمود باحميد
+الديار : مدودة
+ساكن في : الشرقية
+الصفات : اسطورة، ارامكو، فورد، يحب الحياة`;
+    }
+
+    if (value === 'faisal') {
+      desc = `الاسم الكامل : فيصل رائد باحميد
+الديار : مدودة
+ساكن في : الشرقية
+الصفات: ملك الوصاخة، مجلود من احمد بفيفا`;
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0xff6600)
+      .setTitle('تعريف ربحات')
+      .setDescription(desc)
+      .setTimestamp();
+
+    return interaction.update({ embeds: [embed] });
+  }
 });
 
 // ====== LOGIN ======
