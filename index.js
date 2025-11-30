@@ -38,12 +38,10 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     const msg = message.content.toLowerCase().trim();
 
-    // ====== تحيات وسلامات ======
     if (msg.includes('هلا') || msg.includes('مرحبا')) return message.channel.send('هلا حبيبي، شخبارك من حضرموت؟');
     if (msg.includes('كيفك') || msg.includes('كيف الحال')) return message.channel.send('تمام الحمد لله، وانت؟');
     if (msg.includes('وداع') || msg.includes('مع السلامة')) return message.channel.send('مع السلامة يا غالي');
 
-    // ====== FUN COMMANDS ======
     if (msg === 'وربي فكك') {
       const jokes = [
         'مرة حضرمي قال لصاحبه: ليش الحلوة غالية؟ قال: لأنها غالية',
@@ -56,12 +54,10 @@ client.on('messageCreate', async (message) => {
     if (msg === 'امصباح') return message.channel.send('صباح الخير');
     if (msg === 'امليل') return message.channel.send('مساء الخير');
 
-    // ====== PING COMMAND ======
     if (msg === '-موجود ولا بيغ بوس جا') {
       return message.channel.send(`موجود البيغ بوس ما جا (البينغ: ${client.ws.ping}ms)`);
     }
 
-    // ====== VOICE ROOM COMMANDS ======
     if (msg === '-يخال خش الروم') {
       if (!message.member.voice.channel) return message.channel.send('ادخل الروم أول');
       const channel = message.member.voice.channel;
@@ -77,7 +73,6 @@ client.on('messageCreate', async (message) => {
       return message.channel.send('طلعت من الروم');
     }
 
-    // ====== ADMIN COMMANDS ======
     if (msg.startsWith('كي قفل فمك')) {
       if (!message.member.permissions.has('ModerateMembers')) return message.channel.send('ما عندك صلاحية');
       const user = message.mentions.members.first();
@@ -127,23 +122,21 @@ client.on('messageCreate', async (message) => {
       }
     }
 
-    // ====== HELP COMMAND ======
     if (msg === 'امجوازنة الحقني' || msg === '!help') {
       return message.channel.send(`هذي الأوامر يا غالي:
-وربي فكك → يرسل نكتة حضرمية
-امصباح → صباح الخير
-امليل → مساء الخير
--موجود ولا بيغ بوس جا → يطلع بينغ
-كي قفل فمك @عضو → ميوت للعضو
-ترحيل الكلب @عضو → باند للعضو
-روح لفلف بمدودة وتعال @عضو → طرد مؤقت للعضو
-نظف المكان عدد → يمسح عدد الرسائل
--تعريف → يطلع رسالة تعريف
--تعريف ربحات → تعريف رائد و فيصل
--من انت → معلومات عن البوت`);
+وربي فكك
+امصباح
+امليل
+-موجود ولا بيغ بوس جا
+كي قفل فمك
+ترحيل الكلب
+روح لفلف بمدودة وتعال
+نظف المكان
+-تعريف
+-تعريف ربحات
+-من انت`);
     }
 
-    // ====== DEFINITION COMMAND ======
     if (msg === '-تعريف') {
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
@@ -165,7 +158,7 @@ client.on('messageCreate', async (message) => {
       return message.channel.send({ embeds: [embed], components: [row] });
     }
 
-    // ====== RABHAT DEFINITION COMMAND ======
+    // ====== تعريف ربحات ======
     if (msg === '-تعريف ربحات') {
       const embed = new EmbedBuilder()
         .setColor(0x00ccff)
@@ -185,7 +178,6 @@ client.on('messageCreate', async (message) => {
       return message.channel.send({ embeds: [embed], components: [row] });
     }
 
-    // ====== BOT INFO COMMAND ======
     if (msg === '-من انت') {
       const embed = new EmbedBuilder()
         .setColor(0x00ff99)
@@ -204,7 +196,6 @@ client.on('messageCreate', async (message) => {
       return message.channel.send({ embeds: [embed] });
     }
 
-    // ====== ROULETTE GAME (HADRAMI) ======
     if (msg === 'روليت') {
       const bullets = [
         '💥 *طراااخ!* — وربي جاتك الرصاصة يا رجال 🤣',
@@ -216,7 +207,6 @@ client.on('messageCreate', async (message) => {
       return message.channel.send(randomChoice(bullets));
     }
 
-    // ====== RANDOM RESPONSE FOR YOUSUF AND AHMED ======
     if (msg === 'يخال اجلد يوسف') {
       const responses = [
         'يوسف وربي اجيب لك سمبوسة بيض',
@@ -245,14 +235,16 @@ client.on('messageCreate', async (message) => {
 // ====== SELECT MENU HANDLER ======
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isStringSelectMenu()) return;
-  const value = interaction.values[0];
 
+  const value = interaction.values[0];
   let desc = '';
 
   if (interaction.customId === 'select_person') {
+
     if (value === 'ammar' || value === 'yasser') {
       desc = 'عيال مدودة';
     }
+
     if (value === 'ahmed') {
       desc = `الاسم كامل: احمد فتحي احمد باحميد
 الجنسية: اليمن
@@ -260,6 +252,7 @@ client.on('interactionCreate', async (interaction) => {
 ايش يرجع: طيورة
 الصفات: خال، رجال، جلاد يوسف`;
     }
+
     if (value === 'yousef') {
       desc = `الاسم كامل: يوسف القحطاني (ابو قحط)
 الجنسية: نص يمن نص سعودية
@@ -284,6 +277,14 @@ client.on('interactionCreate', async (interaction) => {
 الديار : مدودة
 ساكن في : الشرقية
 الصفات : اسطورة، ارامكو، فورد، يحب الحياة`;
+
+      const embed = new EmbedBuilder()
+        .setColor(0xff6600)
+        .setTitle('تعريف ربحات')
+        .setDescription(desc)
+        .setTimestamp();
+
+      return interaction.update({ embeds: [embed] });
     }
 
     if (value === 'faisal') {
@@ -291,15 +292,20 @@ client.on('interactionCreate', async (interaction) => {
 الديار : مدودة
 ساكن في : الشرقية
 الصفات: ملك الوصاخة، مجلود من احمد بفيفا`;
+
+      const embed = new EmbedBuilder()
+        .setColor(0xff6600)
+        .setTitle('تعريف ربحات')
+        .setDescription(desc)
+        .setTimestamp();
+
+      return interaction.update({
+        embeds: [embed],
+        files: [
+          "https://cdn.discordapp.com/attachments/1443918755112554670/1444766597515579432/Snapchat-1585944966.mp4?ex=692de73f&is=692c95bf&hm=c767e7770f2ddb886f39ee9f2174e857d280a3c3a68baaa23a5d670b9deeba8e&"
+        ]
+      });
     }
-
-    const embed = new EmbedBuilder()
-      .setColor(0xff6600)
-      .setTitle('تعريف ربحات')
-      .setDescription(desc)
-      .setTimestamp();
-
-    return interaction.update({ embeds: [embed] });
   }
 });
 
