@@ -95,7 +95,7 @@ client.on('messageCreate', async (message) => {
       const user = message.mentions.members.first();
       if (!user) return message.channel.send('اختر عضو عشان تطرده');
       try {
-        await user.ban();
+        await user.bban();
         return message.channel.send(`عضو ${user.user.username} انبند`);
       } catch {
         return message.channel.send('ما قدرت انبنده — تأكد صلاحيات البوت ورتبته');
@@ -181,6 +181,18 @@ client.on('messageCreate', async (message) => {
         .setTimestamp();
 
       return message.channel.send({ embeds: [embed] });
+    }
+
+    // ====== ROULETTE GAME (HADRAMI) ======
+    if (msg === 'روليت') {
+      const bullets = [
+        '💥 *طراااخ!* — وربي جاتك الرصاصة يا رجال 🤣',
+        '😮‍💨 فاضي… نجوت يا خال بس لا تعيدها كثير!',
+        '💥 الله يرحمك… طلقة مباشرة في مخك 😂',
+        '😎 فاضي يا خوي… شكلك اليوم محظوظ',
+        '💥 عاد ما توقعتك تموت بهذه السرعة يا رجال 🤣'
+      ];
+      return message.channel.send(randomChoice(bullets));
     }
 
     // ====== RANDOM RESPONSE FOR YOUSUF AND AHMED ======
