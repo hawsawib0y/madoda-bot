@@ -7,13 +7,13 @@ import {
   StringSelectMenuBuilder, 
   EmbedBuilder 
 } from 'discord.js';
+import { Player } from 'discord-player';
+import { joinVoiceChannel } from '@discordjs/voice';
 
 // ====== KEEP ALIVE FOR RENDER ======
 const app = express();
 app.get('/', (req, res) => res.send('Bot is running!'));
-app.listen(process.env.PORT || 3000, () => 
-  console.log(`Web service running on port ${process.env.PORT || 3000}`)
-);
+app.listen(3000, () => console.log('Web service running on port 3000'));
 
 // ====== DISCORD BOT ======
 const client = new Client({
@@ -25,11 +25,18 @@ const client = new Client({
   ]
 });
 
-// دالة لاختيار عشوائي
+// ====== MUSIC PLAYER ======
+const player = new Player(client);
+player.events.on("playerStart", (queue, track) => {
+  queue.metadata.channel.send(`🎶 شغلت: **${track.title}**`);
+});
+
+// ====== HELPER FUNCTION ======
 function randomChoice(arr) {
-  return arr[Math.floor(Math.random() * Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// ====== READY EVENT ======
 client.once('ready', () => {
   console.log(`البوت شغال! اسم البوت: ${client.user.username}`);
 });
@@ -40,6 +47,7 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     const msg = message.content.toLowerCase().trim();
 
+    // ====== SIMPLE RESPONSES ======
     if (msg.includes('هلا') || msg.includes('مرحبا')) return message.channel.send('هلا حبيبي، شخبارك من حضرموت؟');
     if (msg.includes('كيفك') || msg.includes('كيف الحال')) return message.channel.send('تمام الحمد لله، وانت؟');
     if (msg.includes('وداع') || msg.includes('مع السلامة')) return message.channel.send('مع السلامة يا غالي');
@@ -60,21 +68,33 @@ client.on('messageCreate', async (message) => {
       return message.channel.send(`موجود البيغ بوس ما جا (البينغ: ${client.ws.ping}ms)`);
     }
 
+    // ====== VOICE CHANNEL COMMANDS ======
     if (msg === '-يخال خش الروم') {
-      if (!message.member.voice.channel) return message.channel.send('ادخل الروم أول');
       const channel = message.member.voice.channel;
-      const botMember = message.guild.members.me;
-      await botMember.voice.setChannel(channel);
-      return message.channel.send('دخلت الروم');
+      if (!channel) return message.channel.send('ادخل الروم أول');
+
+      try {
+        joinVoiceChannel({
+          channelId: channel.id,
+          guildId: channel.guild.id,
+          adapterCreator: channel.guild.voiceAdapterCreator,
+        });
+        return message.channel.send('دخلت الروم');
+      } catch (err) {
+        console.error(err);
+        return message.channel.send('صارت مشكلة ومو قادر ادخل الروم');
+      }
     }
 
     if (msg === '-يخال اطلع من الروم') {
       const botMember = message.guild.members.me;
       if (!botMember.voice.channel) return message.channel.send('أنا مو في أي روم');
-      await botMember.voice.disconnect();
+      const connection = botMember.voice.connection;
+      if (connection) connection.destroy();
       return message.channel.send('طلعت من الروم');
     }
 
+    // ====== MODERATION COMMANDS ======
     if (msg.startsWith('كي قفل فمك')) {
       if (!message.member.permissions.has('ModerateMembers')) return message.channel.send('ما عندك صلاحية');
       const user = message.mentions.members.first();
@@ -124,21 +144,29 @@ client.on('messageCreate', async (message) => {
       }
     }
 
+    // ====== HELP COMMAND ======
     if (msg === 'امجوازنة الحقني' || msg === '!help') {
       return message.channel.send(`هذي الأوامر يا غالي:
 وربي فكك
 امصباح
 امليل
 -موجود ولا بيغ بوس جا
+-يخال خش الروم
+-يخال اطلع من الروم
 كي قفل فمك
 ترحيل الكلب
 روح لفلف بمدودة وتعال
 نظف المكان
 -تعريف
 -تعريف ربحات
--من انت`);
+-من انت
+-تشغيل
+-ايقاف
+-تخطي
+-الموسيقى`);
     }
 
+    // ====== SELECT MENU HANDLER ======
     if (msg === '-تعريف') {
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
@@ -197,35 +225,39 @@ client.on('messageCreate', async (message) => {
       return message.channel.send({ embeds: [embed] });
     }
 
-    if (msg === 'روليت') {
-      const bullets = [
-        '💥 *طراااخ!* — وربي جاتك الرصاصة يا رجال 🤣',
-        '😮‍💨 فاضي… نجوت يا خال بس لا تعيدها كثير!',
-        '💥 الله يرحمك… طلقة مباشرة في مخك 😂',
-        '😎 فاضي يا خوي… شكلك اليوم محظوظ',
-        '💥 عاد ما توقعتك تموت بهذه السرعة يا رجال 🤣'
-      ];
-      return message.channel.send(randomChoice(bullets));
+    // ====== MUSIC COMMANDS ======
+    if (msg.startsWith('-تشغيل')) {
+      const query = msg.replace('-تشغيل', '').trim();
+      if (!query) return message.channel.send("اكتب اسم الأغنية.");
+
+      const channel = message.member.voice.channel;
+      if (!channel) return message.channel.send("ادخل روم صوتي أول.");
+
+      await player.play(channel, query, {
+        requestedBy: message.author,
+        metadata: { channel: message.channel }
+      });
+      return;
     }
 
-    if (msg === 'يخال اجلد يوسف') {
-      const responses = [
-        'يوسف وربي اجيب لك سمبوسة بيض',
-        'يوسف بيجيب لك مارتيزر',
-        'مالك الا ولد مدودة يجي يجلدك',
-        'نجيب سمبوسة بيض ولا كيف؟'
-      ];
-      return message.channel.send(randomChoice(responses));
+    if (msg === '-ايقاف') {
+      const queue = player.nodes.get(message.guild.id);
+      if (!queue) return message.channel.send("مافي موسيقى شغّالة.");
+      queue.node.stop();
+      return message.channel.send("⏹️ أوقفت الموسيقى.");
     }
 
-    if (msg === 'يخال اجلد احمد') {
-      const responses = [
-        'ابي اعطيك O2 ولا كيف',
-        'بجيب لك يوسف',
-        'بجيب لك ابو قحط',
-        'مالك الا يوسف يرحلك'
-      ];
-      return message.channel.send(randomChoice(responses));
+    if (msg === '-تخطي') {
+      const queue = player.nodes.get(message.guild.id);
+      if (!queue) return message.channel.send("مافي موسيقى شغّالة.");
+      await queue.node.skip();
+      return message.channel.send("⏭️ تم التخطي.");
+    }
+
+    if (msg === '-الموسيقى') {
+      const queue = player.nodes.get(message.guild.id);
+      if (!queue) return message.channel.send("مافي موسيقى شغّالة.");
+      return message.channel.send(`🎧 شغّال الآن: **${queue.currentTrack.title}**`);
     }
 
   } catch (err) {
@@ -233,7 +265,7 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-// ====== SELECT MENU HANDLER ======
+// ====== SELECT MENU INTERACTIONS ======
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isStringSelectMenu()) return;
 
@@ -241,26 +273,9 @@ client.on('interactionCreate', async (interaction) => {
   let desc = '';
 
   if (interaction.customId === 'select_person') {
-
-    if (value === 'ammar' || value === 'yasser') {
-      desc = 'عيال مدودة';
-    }
-
-    if (value === 'ahmed') {
-      desc = `الاسم كامل: احمد فتحي احمد باحميد
-الجنسية: اليمن
-الديار: مدودة
-ايش يرجع: طيورة
-الصفات: خال، رجال، جلاد يوسف`;
-    }
-
-    if (value === 'yousef') {
-      desc = `الاسم كامل: يوسف القحطاني (ابو قحط)
-الجنسية: نص يمن نص سعودية
-الديار: ماعنده مترحل من مدودة
-ايش يرجع: قاضي او قحطاني
-الصفات: كابوس احمد، خال، نشبة، مطوع`;
-    }
+    if (value === 'ammar' || value === 'yasser') desc = 'عيال مدودة';
+    if (value === 'ahmed') desc = `الاسم كامل: احمد فتحي احمد باحميد\nالجنسية: اليمن\nالديار: مدودة\nايش يرجع: طيورة\nالصفات: خال، رجال، جلاد يوسف`;
+    if (value === 'yousef') desc = `الاسم كامل: يوسف القحطاني (ابو قحط)\nالجنسية: نص يمن نص سعودية\nالديار: ماعنده مترحل من مدودة\nايش يرجع: قاضي او قحطاني\nالصفات: كابوس احمد، خال، نشبة، مطوع`;
 
     const embed = new EmbedBuilder()
       .setColor(0xff9900)
@@ -272,41 +287,20 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.customId === 'select_rabhat') {
-
     if (value === 'as6ora') {
-      desc = `الاسم الكامل : رائد محمود باحميد
-الديار : مدودة
-ساكن في : الشرقية
-الصفات : اسطورة، ارامكو، فورد، يحب الحياة`;
-
-      const embed = new EmbedBuilder()
-        .setColor(0xff6600)
-        .setTitle('تعريف ربحات')
-        .setDescription(desc)
-        .setTimestamp();
-
-      return interaction.update({ embeds: [embed] });
+      desc = `الاسم الكامل : رائد محمود باحميد\nالديار : مدودة\nساكن في : الشرقية\nالصفات : اسطورة، ارامكو، فورد، يحب الحياة`;
     }
-
     if (value === 'faisal') {
-      desc = `الاسم الكامل : فيصل رائد باحميد
-الديار : مدودة
-ساكن في : الشرقية
-الصفات: ملك الوصاخة، مجلود من احمد بفيفا`;
-
-      const embed = new EmbedBuilder()
-        .setColor(0xff6600)
-        .setTitle('تعريف ربحات')
-        .setDescription(desc)
-        .setTimestamp();
-
-      return interaction.update({
-        embeds: [embed],
-        files: [
-          "https://cdn.discordapp.com/attachments/1443918755112554670/1444766597515579432/Snapchat-1585944966.mp4"
-        ]
-      });
+      desc = `الاسم الكامل : فيصل رائد باحميد\nالديار : مدودة\nساكن في : الشرقية\nالصفات: ملك الوصاخة، مجلود من احمد بفيفا`;
     }
+
+    const embed = new EmbedBuilder()
+      .setColor(0xff6600)
+      .setTitle('تعريف ربحات')
+      .setDescription(desc)
+      .setTimestamp();
+
+    return interaction.update({ embeds: [embed] });
   }
 });
 
