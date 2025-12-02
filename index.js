@@ -11,7 +11,9 @@ import {
 // ====== KEEP ALIVE FOR RENDER ======
 const app = express();
 app.get('/', (req, res) => res.send('Bot is running!'));
-app.listen(3000, () => console.log('Web service running on port 3000'));
+app.listen(process.env.PORT || 3000, () => 
+  console.log(`Web service running on port ${process.env.PORT || 3000}`)
+);
 
 // ====== DISCORD BOT ======
 const client = new Client({
@@ -25,7 +27,7 @@ const client = new Client({
 
 // دالة لاختيار عشوائي
 function randomChoice(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * Math.random() * arr.length)];
 }
 
 client.once('ready', () => {
@@ -158,7 +160,6 @@ client.on('messageCreate', async (message) => {
       return message.channel.send({ embeds: [embed], components: [row] });
     }
 
-    // ====== تعريف ربحات ======
     if (msg === '-تعريف ربحات') {
       const embed = new EmbedBuilder()
         .setColor(0x00ccff)
@@ -302,7 +303,7 @@ client.on('interactionCreate', async (interaction) => {
       return interaction.update({
         embeds: [embed],
         files: [
-          "https://cdn.discordapp.com/attachments/1443918755112554670/1444766597515579432/Snapchat-1585944966.mp4?ex=692de73f&is=692c95bf&hm=c767e7770f2ddb886f39ee9f2174e857d280a3c3a68baaa23a5d670b9deeba8e&"
+          "https://cdn.discordapp.com/attachments/1443918755112554670/1444766597515579432/Snapchat-1585944966.mp4"
         ]
       });
     }
