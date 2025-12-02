@@ -9,11 +9,12 @@ import { 
 } from 'discord.js';
 import { Player } from 'discord-player';
 import { joinVoiceChannel } from '@discordjs/voice';
-// +++ الإضافة المطلوبة: استيراد مكتبة OpenAI +++
+// +++ الإضافات لحل مشكلة الموسيقى والشات +++
+import { SoundCloudExtractor, SpotifyExtractor, YouTubeExtractor } from "@discord-player/extractor"; 
 import { OpenAI } from 'openai'; 
 
 // ====== تهيئة OpenAI ======
-// تأكد من إضافة OPENAI_API_KEY=YOUR_KEY في ملف .env
+// تأكد من إضافة OPENAI_API_KEY=YOUR_KEY في إعدادات Render
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -35,6 +36,12 @@ const client = new Client({
 
 // ====== MUSIC PLAYER ======
 const player = new Player(client);
+
+// +++ تفعيل أدوات البحث (حل مشكلة Extractor) +++
+player.extractors.register(YouTubeExtractor, {});
+player.extractors.register(SpotifyExtractor, {});
+player.extractors.register(SoundCloudExtractor, {});
+
 player.events.on("playerStart", (queue, track) => {
   queue.metadata.channel.send(`🎶 شغلت: **${track.title}**`);
 });
@@ -111,7 +118,7 @@ client.on('messageCreate', async (message) => {
         return message.channel.send('يا خال، ما قدرت أتواصل مع الشات جي بي تي. تأكد من إعدادات المفتاح.');
       }
     }
-    // --- نهاية الإضافة المطلوبة ---
+    // --- نهاية إضافة الشات ---
 
 
     // ====== VOICE CHANNEL COMMANDS ======
@@ -322,7 +329,7 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.customId === 'select_person') {
     if (value === 'ammar' || value === 'yasser') desc = 'عيال مدودة';
     if (value === 'ahmed') desc = `الاسم كامل: احمد فتحي احمد باحميد\nالجنسية: اليمن\nالديار: مدودة\nايش يرجع: طيورة\nالصفات: خال، رجال، جلاد يوسف`;
-    if (value === 'yousef') desc = `الاسم كامل: يوسف القحطاني (ابو قحط)\nالجنسية: نص يمن نص سعودية\nالديار: ماعنده مترحل من مدودة\nايش يرجع: قاضي او قحطاني\nالصفات: كابوس احمد، خال، نشبة، مطوع`;
+    if (value === 'yousef') desc = `الاسم كامل: يوسف القحطاني (ابو قحط)\nالجنسية: نص يمن نص سعودية\nالديار: ماعنده مترحل من مدودة\nايش يرجع: قاضي او قحطاني\nالصفات: كابوس احمد، نشبة، مطوع`;
 
     const embed = new EmbedBuilder()
       .setColor(0xff9900)
