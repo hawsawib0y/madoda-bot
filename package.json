@@ -10,6 +10,7 @@
     "discord-player": "^6.0.0",
     "@discordjs/voice": "^0.16.0",
     "openai": "^4.20.1",
-    "@discord-player/extractor": "^4.4.1" 
+    "@discord-player/extractor": "^4.4.1",
+    "ytdl-core": "^4.11.5"  <-- **هذا هو السطر الجديد المطلوب**
   }
 }
